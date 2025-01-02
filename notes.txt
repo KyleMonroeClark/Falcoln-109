@@ -1,0 +1,11 @@
+To do List:
+
+Providers dynamically added and removed
+there's something wrong witht the home delivery/ office pickup
+^for the above, the problem also occurs with clearing in between new orders
+Marked deleted variable?
+fix the centering issue - in main
+sql lite change?
+order detail and orders
+
+Proof of delivery maker -pdf made first, then add from fields
