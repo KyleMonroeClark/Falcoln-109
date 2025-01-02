@@ -1,18 +1,1 @@
-Order Number,Order Date,Provider,Patient First Name,Patient Last Name,Date of Birth,Insurance,Supplier,Model,Garment Type,Body Location,Compression Level,Size,Length,Strap,Toe,Color,Side,Quantity,Notes,Delivery Option,Delivery Address 1,Delivery Address 2,City,State,Zip,Is Ordered,Marked Ordered Date,Is Delivered,Marked Delivered Date
-1,2024-12-26,Kristin Shepard,Gary,Hop,00-00-Date,,Medi,Active,Knee High Stocking,,20-30 mg,V,V,,Closed Toe,Color in Notes,,3 Single,"1 pair, 1 single, White",Office Pickup,,,,,,True,2024-12-26,True,2024-12-26
-2,2024-12-26,Kyle Clark,Christina,Lea,00-00-Date,,Jobst,,Custom,,20-30 mg,,,,Closed Toe,Color in Notes,,3 Single,"Same as previous, I think shipped to home in TheraOffice",Drop Shipping,,,,,,True,2024-12-26,False,
-3,2024-12-26,Kyle Clark,Christina,Mascorro,00-00-Date,,,,Thigh High Stocking,,20-30 mg,Medium,Medium,,No Toe Prefrence,Beige,,1 Pair,,Office Pickup,,,,,,True,2024-12-31,True,2024-12-31
-4,2024-12-26,Kyle Clark,Joan,Sargen,00-00-Date,,No Preference,,Knee High Stocking,,20-30 mg,small,small,,Closed Toe,Color in Notes,,4 Pair,"2 black, 2 beige",Office Pickup,,,,,,True,2024-12-31,True,2024-12-31
-5,2024-12-26,Kristin Shepard,Nancy,Page,00-00-Date,Medicare,Medi,,Knee High Stocking,,20-30 mg,,,,No Toe Prefrence,Beige,,1 Pair,,Office Pickup,,,,,,True,2024-12-31,True,2024-12-31
-6,2024-12-30,Kyle Clark,Charles,Wilkie,00-00-Date,Medicare,L&R,Readywrap Calf,Adjustable Wrap,Calf,,XL,Long,,,Black,,1 Pair,will probably want to order more,Drop Shipping,7505 CASTANO AVE,,ATASCADERO,CA,93422-4705,True,2024-12-30,True,2024-12-31
-7,2024-12-30,Jamie Cinotto,Stephanie,Fleming,00-00-Date,,No Preference,,Thigh High Stocking,Calf,30-40 mg,,Long,,,Color in Notes,Pair,1 Pair,"another pair of thigh high, 30-40 AT36251",Office Pickup,,,,,,True,2024-12-31,True,2024-12-31
-8,2024-12-30,Jamie Cinotto,,Clark,00-00-Date,,,,Nightime,Calf,30-40 mg,,Long,,,Color in Notes,Pair,1 Pair,"Full leg night time garments, for Clark",Office Pickup,,,,,,True,2024-12-31,False,
-9,2024-12-30,Kyle Clark,Judith,Blanco,00-00-Date,,Jobst,,Custom,Calf,30-40 mg,,Long,,,Color in Notes,Pair,1 Pair,custom garment in Teams chat,Office Pickup,,,,,,True,2024-12-31,False,
-10,2024-12-30,Kristin Shepard,Rahela,Pana,00-00-Date,Medicare,,,Custom,Calf,30-40 mg,,Long,,,Color in Notes,Pair,1 Pair,"Pneumatic compression pump for LUE and L chest/axilla, Dx I97.2, Medicare, consistent with compression and MLD. ",Office Pickup,,,,,,False,,False,
-11,2024-12-30,Kristin Shepard,Bruce,Bero,00-00-Date,,Jobst,Classic Night time compression Sleeve Ready-to-Wear JoViPak,Nightime,Calf,,,,,,,,,"Pt and product details: Height: 5'11'', Weight: 216 lbs, Gender: Male, Side: Right, Side: X-large, Length: Long, Standard channeling",Office Pickup,,,,,,False,,False,
-12,2024-12-30,Jamie Cinotto,Jean,,00-00-Date,,,,Custom,Calf,,,,,,,,,note just says order custom for Jean,Office Pickup,,,,,,False,,False,
-13,2024-12-30,Kristin Shepard,Tammy,Frogge,00-00-Date,,Jobst,Confidence,Custom,Calf,,,,,,,,,see custom order form,Office Pickup,,,,,,True,2024-12-31,False,
-14,2024-12-30,Jamie Cinotto,Joan,Sargen,00-00-Date,,Medi,,Custom,Calf,,,,,,,,,reorder her last order for closed toe,Office Pickup,,,,,,False,,False,
-15,2024-12-30,Kristin Shepard,Laree,Brown,00-00-Date,,Medi,,Knee High Stocking,Calf,20-30 mg,,,,Closed Toe,Beige,Pair,1 Pair,,Office Pickup,,,,,,False,,False,
-16,2024-12-30,Jamie Cinotto,Kim,Palmer,00-00-Date,,,,Head / Neck,Calf,,,,,,,,,,Office Pickup,,,,,,True,2024-12-31,False,
-17,2024-12-30,Kristin Shepard,Richard,Spangler,00-00-Date,,,,Nightime,Calf,,,,,,,,,foot to knee piece,Office Pickup,,,,,,False,,False,
+
