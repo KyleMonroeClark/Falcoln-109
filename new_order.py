@@ -162,7 +162,7 @@ class new_order_Frame(tk.Frame):
         TOE_OPTIONS = ["Open Toe", "Closed Toe", "No Toe Prefrence"]
         SIDE_OPTIONS = ["No Side", "Right", "Left", "Pair"]
         QUANTITY_OPTIONS = ["1 Pair", "2 Pair", "3 Pair", "4 Pair", "5 Pair", "1 Single", "2 Single", "3 Single", "4 Single", "5 Single"]
-        COLORS = ["Black", "Beige", "Color in Notes"]
+        COLORS = ["Black", "Beige", "Sand","White", "Color in Notes"]
         months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
         self.garment_type_widgets = {
