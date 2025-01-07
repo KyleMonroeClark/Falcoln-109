@@ -79,8 +79,8 @@ class delivery_list_Frame(tk.Frame):
     def create_treeview(self):
         # Define the columns to be displayed
         columns = (
-            "Order Number", "Marked Ordered", "Provider", "Patient Name", "Date of Birth", 
-            "Supplier", "Model", "Garment Type", "Compression Level", "Size", "Color", "Side", "Quantity", "Other"
+            "Order Number", "Marked Ordered", "Provider", "Patient Name",
+            "Supplier", "Model", "Garment Type", "Side", "Quantity", "Other"
         )
 
         # Create the Treeview widget
@@ -132,28 +132,33 @@ class delivery_list_Frame(tk.Frame):
         # Loop through all filtered orders and insert them into the treeview
         for order in filtered_orders:
             patient_name = f"{order['Patient First Name']} {order['Patient Last Name']}"
-            size_length = f"{order['Size']}, {order['Length']}"
+            if order['Size'] != "" and order['Length'] != "":
+                size_length = f"{order['Size']}, {order['Length']}"
+            elif order['Size'] != "" or order['Length'] != "":
+                size_length = f"{order['Size']}{order['Length']}"
+            else:
+                size_length = "N/A"
             # Prepare the row values
             row_values = (
                 order["Order Number"],
                 order["Marked Ordered Date"],
                 order["Provider"],
                 patient_name,
-                order["Date of Birth"],
                 order["Supplier"],
                 order["Model"],
                 order["Garment Type"],
-                order["Compression Level"],
-                size_length,
-                order["Color"],
                 order["Side"],
                 order["Quantity"]
             )
 
             # Prepare the "Other" column (optional additional details)
             other_values = []
+            if not size_length == "N/A":
+                other_values.append(f"Size/ Legnth: {size_length}")
             if order["Body Location"]:
                 other_values.append(f"Body Location: {order['Body Location']}")
+            if not order["Color"] == "Color in Notes":
+                other_values.append(f"Color: {order['Color']}")
             if order["Length"]:
                 other_values.append(f"Length: {order['Length']}")
             if order["Strap"]:
