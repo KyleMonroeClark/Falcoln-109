@@ -1,24 +1,28 @@
 import tkinter as tk
 import importlib
+import os
+import sys
 from tkinter import ttk
+import main_menu
+import new_order
+import order_list
+import delivery_list
+import check_orders
+
 
 class MainApp:
     def __init__(self, root):
         self.root = root
-        self.root.title("Main Application")
+        self.root.title("Falcon 109 v.1.0")
         self.root.geometry("800x600")  # Initial size, can be resized
-        self.root.config(bg="#f0f8ff")
+        self.root.config(bg="#f8f8f8")
 
         # Create a canvas
-        self.canvas = tk.Canvas(self.root, bg="#f0f8ff")
+        self.canvas = tk.Canvas(self.root, bg="#f8f8f8")
 
-        # Create a vertical scrollbar
+        # vertical scrollbar
         self.scrollbar_y = ttk.Scrollbar(self.root, orient="vertical", command=self.canvas.yview)
         self.canvas.configure(yscrollcommand=self.scrollbar_y.set)
-
-        # Create a horizontal scrollbar
-        self.scrollbar_x = ttk.Scrollbar(self.root, orient="horizontal", command=self.canvas.xview)
-        self.canvas.configure(xscrollcommand=self.scrollbar_x.set)
 
         # Create a frame inside the canvas that will hold the actual content
         self.content_frame = tk.Frame(self.canvas, bg="#f0f8ff", width=600, height=400)
@@ -29,9 +33,8 @@ class MainApp:
         self.show_frame('main_menu')
 
         # Pack the canvas and scrollbars to fill the window
-        self.canvas.pack(side="top", fill="both", expand=True)
+        self.canvas.pack(side="left", fill="both", expand=True)
         self.scrollbar_y.pack(side="right", fill="y")
-        self.scrollbar_x.pack(side="bottom", fill="x")
 
         # Bind resizing events
         self.root.bind("<Configure>", self.update_layout)  # Bind to window resize
@@ -45,10 +48,23 @@ class MainApp:
         if self.current_frame is not None:
             self.current_frame.destroy()
 
-        # Dynamically import the frame script based on the frame_name
+        # Determine the base directory for the frames based on whether running as an exe or not
+        if getattr(sys, 'frozen', False):
+            # Running as an executable (PyInstaller bundles the file into the temporary folder)
+            base_dir = sys._MEIPASS
+        else:
+            # Running as a regular script (during development)
+            base_dir = os.path.dirname(__file__)
+
+        # Build the full path to the frame module
+        frame_module = importlib.import_module(frame_name)
+
         try:
-            frame_module = importlib.import_module(frame_name)  # Dynamically load the module
-            frame_class = getattr(frame_module, frame_name + '_Frame')  # Ensure correct class name
+            # Dynamically import the frame script based on the frame_name (use the full path logic)
+            frame_module = importlib.import_module(f"{frame_name}")  # frame_name must be the module name
+            frame_class_name = f"{frame_name}_Frame"   # Use naming convention
+            frame_class = getattr(frame_module, frame_class_name)
+
             self.current_frame = frame_class(self.content_frame, self)  # Create frame instance
 
             # Ensure the frame fills the entire space of the content_frame
@@ -57,7 +73,7 @@ class MainApp:
             # After loading the frame, immediately update the layout
             self.update_layout()
 
-        except (ModuleNotFoundError, AttributeError) as e:
+        except (ModuleNotFoundError, AttributeError, FileNotFoundError) as e:
             print(f"Error: Could not load frame {frame_name}. {e}")
 
         # Recalculate layout to center content and update scroll region after the frame is packed

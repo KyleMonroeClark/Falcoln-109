@@ -2,14 +2,24 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import csv
 import os
+import sys
 from datetime import date
 from calendar import month_name
 
 class check_orders_Frame(tk.Frame):
+    def get_file_path(self, csv_file):
+        """ Determine the correct file path whether running as a script or executable """
+        if getattr(sys, 'frozen', False):
+            # Running as an executable (PyInstaller)
+            return os.path.join(sys._MEIPASS, csv_file)
+        else:
+            # Running as a regular script (development mode)
+            return os.path.join(os.path.dirname(__file__), csv_file)
+
     def __init__(self, parent, controller, csv_file="orders.csv"):
         super().__init__(parent)
         self.controller = controller
-        self.csv_file = csv_file
+        self.csv_file = self.get_file_path(csv_file)
         self.orders = self.load_orders()
 
         # Title
@@ -88,25 +98,35 @@ class check_orders_Frame(tk.Frame):
         self.month_filter.bind("<<ComboboxSelected>>", lambda _: self.refresh_treeview())
 
     def create_treeview(self):
-        # Define the columns to be displayed
+        # Define columns to be displayed
         columns = (
             "Order Number", "Patient Name", "Order Date", "Marked Ordered", "Marked Delivered"
         )
 
+        # Create a frame to hold both the Treeview and the Scrollbars
+        tree_frame = tk.Frame(self)
+        tree_frame.pack(fill="both", expand=True)
+
         # Create the Treeview widget
-        self.tree = ttk.Treeview(self, columns=columns, show="headings", height=20)
+        self.tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=20)
         
         # Configure the columns and headings
         for col in columns:
             self.tree.heading(col, text=col, anchor=tk.W)
             self.tree.column(col, anchor=tk.W, width=120)
 
-        self.tree.pack(pady=10)
+        # Add a vertical scrollbar for the Treeview
+        tree_scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=tree_scrollbar.set)
+        tree_scrollbar.pack(side="right", fill="y")
+
+        # Pack the Treeview inside the tree_frame
+        self.tree.pack(pady=10, expand=True, fill="both")
 
         # Style for bold headers
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("Arial", 10, "bold"))
-        
+
         # Insert data into the treeview
         self.refresh_treeview()
 
@@ -119,6 +139,9 @@ class check_orders_Frame(tk.Frame):
 
         # Filter orders based on selected filters
         filtered_orders = self.orders
+        filtered_orders = [
+            order for order in filtered_orders
+            if not (order.get("Deleted") is True or str(order.get("Deleted", "")).lower() == "true")]
 
         if selected_supplier != "All":
             filtered_orders = [order for order in filtered_orders if order["Supplier"] == selected_supplier]
@@ -170,8 +193,25 @@ class check_orders_Frame(tk.Frame):
         button_frame = tk.Frame(self)
         button_frame.pack(pady=10)
 
-        tk.Button(button_frame, text="Examine Order", command=self.examine_order, bg="blue", fg="white").pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Mark Completed/ Delete", command=self.examine_order, bg="green", fg="white").pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Examine Order", command=self.mark_complete, bg="blue", fg="white").pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="Back", command=lambda: self.controller.show_frame('main_menu'), bg="red", fg="white").pack(side=tk.LEFT, padx=5)
+
+    def mark_complete(self):
+
+        selected_item = self.tree.selection()
+        if not selected_item:
+            return
+        selected_values = self.tree.item(selected_item, "values")
+        order_number = selected_values[0]
+
+        for order in self.orders:
+            if order["Order Number"] == order_number:
+                order["Deleted"] = "True"
+                break
+
+        self.save_orders()
+        self.refresh_treeview()
 
     def examine_order(self):
         selected_item = self.tree.selection()

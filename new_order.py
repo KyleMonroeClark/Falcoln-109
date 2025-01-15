@@ -4,6 +4,7 @@ from tkcalendar import DateEntry
 import datetime
 import csv
 import os
+import sys
 
 class new_order_Frame(tk.Frame):
 
@@ -99,7 +100,10 @@ class new_order_Frame(tk.Frame):
                 # Increment row for the next widget
                 row += 1
 
-
+    def update_scroll_region(self, event=None):
+        """Update the scroll region to match the size of the content inside the canvas."""
+        self.canvas.configure(scrollregion=self.canvas.bbox("all"))
+        
     def __init__(self, parent, controller):
         # Setup
         bg_color = controller.root.cget('bg')  # Get the background color of the main window
@@ -153,7 +157,7 @@ class new_order_Frame(tk.Frame):
                 self.zip.delete(0, tk.END)
                 self.zip.grid_forget() 
 
-        # Here's a modularized version of your widget definitions
+        # Here's a modularized version of my widget definitions
         PROVIDERS = ["Jamie Cinotto", "Kristin Shepard", "Hashim Jaderanni", "Kyle Clark"]
         INSURANCES = ["Medicare", "Self-Pay", "Aetna", "Anthem Blue Cross", "Blue Shield", "Cencal", "CCPN", "Physician's Choice", "Insurance in Notes"]
         SUPPLIERS = ["Medi", "Juzo", "Jobst", "Sigvaris", "L&R", "Prairiewear", "No Preference"]
@@ -410,7 +414,12 @@ class new_order_Frame(tk.Frame):
 
     def submit_order(self):
         # File path for the orders CSV file
-        file_path = 'orders.csv'
+        if getattr(sys, 'frozen', False):
+            # Running as an executable (PyInstaller bundles the file into the temporary folder)
+            file_path = os.path.join(sys._MEIPASS, "orders.csv")
+        else:
+            # Running as a regular script (during development)
+            file_path = os.path.join(os.path.dirname(__file__), "orders.csv")
 
         # Check if the CSV file exists
         if not os.path.exists(file_path):
@@ -420,7 +429,7 @@ class new_order_Frame(tk.Frame):
                 header = ['Order Number', 'Order Date', 'Provider', 'Patient First Name', 'Patient Last Name', 'Date of Birth', 
                         'Insurance', 'Supplier', 'Model', 'Garment Type', 'Body Location', 'Compression Level', 'Size', 'Length', 
                         'Strap', 'Toe', 'Color', 'Side', 'Quantity', 'Notes', 'Delivery Option', 'Delivery Address 1', 'Delivery Address 2', 
-                        'City', 'State', 'Zip', 'Is Ordered', 'Marked Ordered Date', 'Is Delivered', 'Marked Delivered Date']
+                        'City', 'State', 'Zip', 'Is Ordered', 'Marked Ordered Date', 'Is Delivered', 'Marked Delivered Date', 'Deleted']
                 writer.writerow(header)
 
         # Read the existing orders to find the last order number
@@ -432,20 +441,20 @@ class new_order_Frame(tk.Frame):
                 last_order_number = int(rows[-1][0])  # Get the last order number from the last row
             order_number = last_order_number + 1  # Increment for the new order
 
-        # Get the data from the form fields
+        # Getting data from the form fields
         order_date_value = self.order_date.get_date().strftime('%Y-%m-%d')
         provider_value = self.provider.get()
         patient_first_name = self.patient_first_name.get()
         patient_last_name = self.patient_last_name.get()
 
-        # Map the months to their respective numeric values (01, 02, ..., 12)
+        # Map months to their numeric values (01, 02, ..., 12)
         month_map = {
             "January": "01", "February": "02", "March": "03", "April": "04",
             "May": "05", "June": "06", "July": "07", "August": "08",
             "September": "09", "October": "10", "November": "11", "December": "12"
         }
 
-        # Get the selected values from the dropdowns
+        # Get selected values from the dropdowns
         dob_month_name = self.month_var.get()  # Month name (e.g., "January")
         dob_date = self.date_var.get()  # Day of the month (e.g., "01")
         dob_year = self.year_var.get()  # Year (e.g., "1990")
@@ -493,13 +502,14 @@ class new_order_Frame(tk.Frame):
         marked_ordered_date = ""
         is_delivered = False
         marked_delivered_date = ""
+        deleted = False
 
         # Prepare the order data
         order_data = [order_number, order_date_value, provider_value, patient_first_name, patient_last_name, dob_value, insurance_value,
                     supplier_value, model_value, garment_type_value, body_location_value, compression_level_value, size_value,
                     length_value, strap_value, toe_value, color_value, side_value, quantity_value, notes_value, delivery_option,
                     delivery_address_1_value, delivery_address_2_value, city_value, state_value, zip_value, is_ordered, 
-                    marked_ordered_date, is_delivered, marked_delivered_date]
+                    marked_ordered_date, is_delivered, marked_delivered_date, deleted]
 
         # Write the new order to the CSV file
         with open(file_path, mode='a', newline='') as file:

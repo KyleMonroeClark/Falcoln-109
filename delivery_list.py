@@ -3,12 +3,22 @@ from tkinter import ttk, messagebox
 import csv
 import os
 from datetime import date
+import sys
 
 class delivery_list_Frame(tk.Frame):
+    def get_file_path(self, csv_file):
+        """ Determine the correct file path whether running as a script or executable """
+        if getattr(sys, 'frozen', False):
+            # Running as an executable (PyInstaller)
+            return os.path.join(sys._MEIPASS, csv_file)
+        else:
+            # Running as a regular script (development mode)
+            return os.path.join(os.path.dirname(__file__), csv_file)
+        
     def __init__(self, parent, controller, csv_file="orders.csv"):
         super().__init__(parent)
         self.controller = controller
-        self.csv_file = csv_file
+        self.csv_file = self.get_file_path(csv_file)
         self.orders = self.load_orders()
 
         # Title
@@ -83,20 +93,30 @@ class delivery_list_Frame(tk.Frame):
             "Supplier", "Model", "Garment Type", "Side", "Quantity", "Other"
         )
 
+        # Create a frame to hold both the Treeview and the Scrollbars
+        tree_frame = tk.Frame(self)
+        tree_frame.pack(fill="both", expand=True)
+
         # Create the Treeview widget
-        self.tree = ttk.Treeview(self, columns=columns, show="headings", height=20)
+        self.tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=20)
         
         # Configure the columns and headings
         for col in columns:
             self.tree.heading(col, text=col, anchor=tk.W)
             self.tree.column(col, anchor=tk.W, width=120)
 
-        self.tree.pack(pady=10)
+        # Add a vertical scrollbar for the Treeview
+        tree_scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=tree_scrollbar.set)
+        tree_scrollbar.pack(side="right", fill="y")
+
+        # Pack the Treeview inside the tree_frame
+        self.tree.pack(pady=10, expand=True, fill="both")
 
         # Style for bold headers
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("Arial", 10, "bold"))
-        
+
         # Insert data into the treeview
         self.refresh_treeview()
 
@@ -113,7 +133,8 @@ class delivery_list_Frame(tk.Frame):
         filtered_orders = [
             order for order in filtered_orders 
             if not (order.get("Is Delivered") == True or str(order.get("Is Delivered", "")).lower() == "true") 
-            and (order.get("Is Ordered") == True or str(order.get("Is Ordered", "")).lower() == "true")
+            and (order.get("Is Ordered") == True or str(order.get("Is Ordered", "")).lower() == "true") 
+            and not (order.get("Deleted") is True or str(order.get("Deleted", "")).lower() == "true")
         ]
 
 

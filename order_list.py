@@ -1,16 +1,26 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
 import csv
+import sys
 import os
 from datetime import date
 
 class order_list_Frame(tk.Frame):
+    def get_file_path(self, csv_file):
+        """ Determine the correct file path whether running as a script or executable """
+        if getattr(sys, 'frozen', False):
+            # Running as an executable (PyInstaller)
+            return os.path.join(sys._MEIPASS, csv_file)
+        else:
+            # Running as a regular script (development mode)
+            return os.path.join(os.path.dirname(__file__), csv_file)
+
     def __init__(self, parent, controller, csv_file="orders.csv"):
         super().__init__(parent)
         self.controller = controller
-        self.csv_file = csv_file
+        self.csv_file = self.get_file_path(csv_file)
         self.orders = self.load_orders()
-
+        
         # Title
         tk.Label(self, text="To-Order List", font=("Arial", 16)).pack(pady=10)
 
@@ -79,24 +89,34 @@ class order_list_Frame(tk.Frame):
     def create_treeview(self):
         # Define the columns to be displayed
         columns = (
-            "Order Number", "Order Date", "Provider", "Patient Name", "Supplier", "Model", 
-            "Garment Type", "Compression Level", "Size, Length", "Color", "Side", "Quantity", "Other"
+            "Order Number", "Patient Name", "Supplier", "Model", 
+            "Garment Type", "Comp. Level", "Size, Length", "Color,", "Side, Quant.", "Other"
         )
 
+        # Create a frame to hold both the Treeview and the Scrollbars
+        tree_frame = tk.Frame(self)
+        tree_frame.pack(fill="both", expand=True)
+
         # Create the Treeview widget
-        self.tree = ttk.Treeview(self, columns=columns, show="headings", height=20)
+        self.tree = ttk.Treeview(tree_frame, columns=columns, show="headings", height=20)
         
         # Configure the columns and headings
         for col in columns:
             self.tree.heading(col, text=col, anchor=tk.W)
             self.tree.column(col, anchor=tk.W, width=120)
 
-        self.tree.pack(pady=10)
+        # Add a vertical scrollbar for the Treeview
+        tree_scrollbar = ttk.Scrollbar(tree_frame, orient="vertical", command=self.tree.yview)
+        self.tree.configure(yscrollcommand=tree_scrollbar.set)
+        tree_scrollbar.pack(side="right", fill="y")
+
+        # Pack the Treeview inside the tree_frame
+        self.tree.pack(pady=10, expand=True, fill="both")
 
         # Style for bold headers
         style = ttk.Style()
         style.configure("Treeview.Heading", font=("Arial", 10, "bold"))
-        
+
         # Insert data into the treeview
         self.refresh_treeview()
 
@@ -111,8 +131,9 @@ class order_list_Frame(tk.Frame):
 
         # Apply filter for "Is Ordered" status (only show orders that are not marked as ordered)
         filtered_orders = [
-            order for order in filtered_orders 
-            if not (order.get("Is Ordered") == True or str(order.get("Is Ordered", "")).lower() == "true")
+            order for order in filtered_orders
+            if (not (order.get("Is Ordered") == True or str(order.get("Is Ordered", "")).lower() == "true")) 
+            and not (order.get("Deleted") is True or str(order.get("Deleted", "")).lower() == "true")
             ]
 
         if selected_supplier != "All":
@@ -138,20 +159,25 @@ class order_list_Frame(tk.Frame):
                 size_length = f"{order['Size']}{order['Length']}"
             else:
                 size_length = "N/A"
+
+            if order['Side'] != "" and order['Quantity'] != "":
+                side_quant = f"{order['Side']}, {order['Quantity']}"
+            elif order['Size'] != "" or order['Length'] != "":
+                side_quant = f"{order['Side']}{order['Quantity']}"
+            else:
+                side_quant = "N/A"
+
             # Prepare the row values
             row_values = (
                 order["Order Number"],
-                order["Order Date"],
-                order["Provider"],
                 patient_name,
                 order["Supplier"],
                 order["Model"],
                 order["Garment Type"],
                 order["Compression Level"],
                 size_length,
-                order["Toe"],
                 order["Color"],
-                order["Quantity"]
+                side_quant
             )
 
             # Prepare the "Other" column (optional additional details)
