@@ -412,14 +412,24 @@ class new_order_Frame(tk.Frame):
         back_button = tk.Button(self, text="Back to Main Menu", command=lambda: controller.show_frame("main_menu"))
         back_button.pack(pady=10)
 
-    def submit_order(self):
-        # File path for the orders CSV file
-        if getattr(sys, 'frozen', False):
-            # Running as an executable (PyInstaller bundles the file into the temporary folder)
-            file_path = os.path.join(sys._MEIPASS, "orders.csv")
+    def get_orders_file_path(self):
+        """Determine the path for the orders.csv file."""
+        
+        if getattr(sys, 'frozen', False):  # Check if running as an executable
+            # Get the path to the folder containing the executable
+            base_dir = os.path.dirname(sys.executable)
+            # Now look one directory above the executable folder for orders.csv
+            orders_path = os.path.join(base_dir, "..", "orders.csv")
         else:
-            # Running as a regular script (during development)
-            file_path = os.path.join(os.path.dirname(__file__), "orders.csv")
+            # If running as a script, look for orders.csv in the same folder as the script
+            base_dir = os.path.dirname(__file__)  # Path to the folder containing the script
+            orders_path = os.path.join(base_dir, "orders.csv")  # Look in the same folder as the script
+
+        return os.path.abspath(orders_path)
+
+    def submit_order(self):
+        # Use the class method to get the correct file path
+        file_path = self.get_orders_file_path()
 
         # Check if the CSV file exists
         if not os.path.exists(file_path):
@@ -427,9 +437,9 @@ class new_order_Frame(tk.Frame):
             with open(file_path, mode='w', newline='') as file:
                 writer = csv.writer(file)
                 header = ['Order Number', 'Order Date', 'Provider', 'Patient First Name', 'Patient Last Name', 'Date of Birth', 
-                        'Insurance', 'Supplier', 'Model', 'Garment Type', 'Body Location', 'Compression Level', 'Size', 'Length', 
-                        'Strap', 'Toe', 'Color', 'Side', 'Quantity', 'Notes', 'Delivery Option', 'Delivery Address 1', 'Delivery Address 2', 
-                        'City', 'State', 'Zip', 'Is Ordered', 'Marked Ordered Date', 'Is Delivered', 'Marked Delivered Date', 'Deleted']
+                          'Insurance', 'Supplier', 'Model', 'Garment Type', 'Body Location', 'Compression Level', 'Size', 'Length', 
+                          'Strap', 'Toe', 'Color', 'Side', 'Quantity', 'Notes', 'Delivery Option', 'Delivery Address 1', 'Delivery Address 2', 
+                          'City', 'State', 'Zip', 'Is Ordered', 'Marked Ordered Date', 'Is Delivered', 'Marked Delivered Date', 'Deleted']
                 writer.writerow(header)
 
         # Read the existing orders to find the last order number
@@ -441,40 +451,28 @@ class new_order_Frame(tk.Frame):
                 last_order_number = int(rows[-1][0])  # Get the last order number from the last row
             order_number = last_order_number + 1  # Increment for the new order
 
-        # Getting data from the form fields
+        # Gather data from form fields
         order_date_value = self.order_date.get_date().strftime('%Y-%m-%d')
         provider_value = self.provider.get()
         patient_first_name = self.patient_first_name.get()
         patient_last_name = self.patient_last_name.get()
 
-        # Map months to their numeric values (01, 02, ..., 12)
+        # Month mapping for DOB conversion
         month_map = {
             "January": "01", "February": "02", "March": "03", "April": "04",
             "May": "05", "June": "06", "July": "07", "August": "08",
             "September": "09", "October": "10", "November": "11", "December": "12"
         }
 
-        # Get selected values from the dropdowns
-        dob_month_name = self.month_var.get()  # Month name (e.g., "January")
-        dob_date = self.date_var.get()  # Day of the month (e.g., "01")
-        dob_year = self.year_var.get()  # Year (e.g., "1990")
-
-        # Convert the month name to the corresponding numeric value
-        dob_month = month_map.get(dob_month_name, "00")  # Default to "00" if invalid month
-
-        # Handle case where day is still set to "Day"
-        if dob_date == "Day":
-            dob_date = "00"  # Default to "00" if no valid day is selected
-        else:
-            dob_date = dob_date.zfill(2)  # Pad day with a leading zero if necessary
-
-        # Handle case where year is still set to "Year"
-        if dob_year == "Year":
-            dob_year = "00"  # Default to "00" if no valid year is selected
-
-        # Create the formatted dob_value in 'YYYY-MM-DD' format
+        dob_month_name = self.month_var.get()
+        dob_date = self.date_var.get()
+        dob_year = self.year_var.get()
+        dob_month = month_map.get(dob_month_name, "00")
+        dob_date = dob_date.zfill(2) if dob_date != "Day" else "00"
+        dob_year = dob_year if dob_year != "Year" else "00"
         dob_value = f"{dob_year}-{dob_month}-{dob_date}"
 
+        # Other field values
         insurance_value = self.insurance.get()
         supplier_value = self.supplier.get()
         model_value = self.model.get()
@@ -489,10 +487,7 @@ class new_order_Frame(tk.Frame):
         side_value = self.side.get()
         quantity_value = self.quantity.get()
         notes_value = self.notes.get("1.0", "end-1c")
-        if self.home_delivery_var.get():
-            delivery_option = "Drop Shipping"
-        else:
-            delivery_option = "Office Pickup"
+        delivery_option = "Drop Shipping" if self.home_delivery_var.get() else "Office Pickup"
         delivery_address_1_value = self.address1.get()
         delivery_address_2_value = self.address2.get()
         city_value = self.city.get()
@@ -504,25 +499,24 @@ class new_order_Frame(tk.Frame):
         marked_delivered_date = ""
         deleted = False
 
-        # Prepare the order data
+        # Order data
         order_data = [order_number, order_date_value, provider_value, patient_first_name, patient_last_name, dob_value, insurance_value,
-                    supplier_value, model_value, garment_type_value, body_location_value, compression_level_value, size_value,
-                    length_value, strap_value, toe_value, color_value, side_value, quantity_value, notes_value, delivery_option,
-                    delivery_address_1_value, delivery_address_2_value, city_value, state_value, zip_value, is_ordered, 
-                    marked_ordered_date, is_delivered, marked_delivered_date, deleted]
+                      supplier_value, model_value, garment_type_value, body_location_value, compression_level_value, size_value,
+                      length_value, strap_value, toe_value, color_value, side_value, quantity_value, notes_value, delivery_option,
+                      delivery_address_1_value, delivery_address_2_value, city_value, state_value, zip_value, is_ordered,
+                      marked_ordered_date, is_delivered, marked_delivered_date, deleted]
 
-        # Write the new order to the CSV file
+        # Write to CSV
         with open(file_path, mode='a', newline='') as file:
             writer = csv.writer(file)
             writer.writerow(order_data)
 
-        # Show a success message
+        # Confirmation
         response = messagebox.askyesno(
             "Order Saved",
             f"Order {order_number} has been saved successfully.\nWould you like to submit another order?"
         )
-
-        if response:  # User wants to submit another order
+        if response:
             self.controller.show_frame("new_order")
         else:
             self.controller.show_frame("main_menu")

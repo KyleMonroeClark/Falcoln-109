@@ -8,13 +8,15 @@ import sys
 class delivery_list_Frame(tk.Frame):
     def get_file_path(self, csv_file):
         """ Determine the correct file path whether running as a script or executable """
-        if getattr(sys, 'frozen', False):
-            # Running as an executable (PyInstaller)
-            return os.path.join(sys._MEIPASS, csv_file)
+        if getattr(sys, 'frozen', False):  # Check if running as an executable
+            # Get the path to the folder containing the executable
+            base_dir = os.path.dirname(sys.executable)
+            # Look one directory above the executable folder for orders.csv
+            return os.path.join(base_dir, "..", csv_file)
         else:
-            # Running as a regular script (development mode)
+            # Running as a script (development mode), look in the same folder as the script
             return os.path.join(os.path.dirname(__file__), csv_file)
-        
+
     def __init__(self, parent, controller, csv_file="orders.csv"):
         super().__init__(parent)
         self.controller = controller

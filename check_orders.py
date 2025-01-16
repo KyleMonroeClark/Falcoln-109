@@ -7,13 +7,16 @@ from datetime import date
 from calendar import month_name
 
 class check_orders_Frame(tk.Frame):
+
     def get_file_path(self, csv_file):
         """ Determine the correct file path whether running as a script or executable """
-        if getattr(sys, 'frozen', False):
-            # Running as an executable (PyInstaller)
-            return os.path.join(sys._MEIPASS, csv_file)
+        if getattr(sys, 'frozen', False):  # Check if running as an executable
+            # Get the path to the folder containing the executable
+            base_dir = os.path.dirname(sys.executable)
+            # Look one directory above the executable folder for orders.csv
+            return os.path.join(base_dir, "..", csv_file)
         else:
-            # Running as a regular script (development mode)
+            # Running as a script (development mode), look in the same folder as the script
             return os.path.join(os.path.dirname(__file__), csv_file)
 
     def __init__(self, parent, controller, csv_file="orders.csv"):
@@ -158,9 +161,10 @@ class check_orders_Frame(tk.Frame):
             
             # Filter orders by the selected month
             filtered_orders = [order for order in filtered_orders if order["Order Date"].split("-")[1] == month_number]
+        
+        # Sort the orders by Order Number (highest first), ensuring numeric sorting
+        filtered_orders.sort(key=lambda x: int(x["Order Number"]), reverse=True)
 
-        # Sort the orders by Order Date (most recent first)
-        filtered_orders.sort(key=lambda x: x["Order Date"], reverse=True)
 
         # Delete all existing rows from the treeview
         self.tree.delete(*self.tree.get_children())
@@ -193,8 +197,8 @@ class check_orders_Frame(tk.Frame):
         button_frame = tk.Frame(self)
         button_frame.pack(pady=10)
 
-        tk.Button(button_frame, text="Mark Completed/ Delete", command=self.examine_order, bg="green", fg="white").pack(side=tk.LEFT, padx=5)
-        tk.Button(button_frame, text="Examine Order", command=self.mark_complete, bg="blue", fg="white").pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Mark Completed/ Delete", command=self.mark_complete, bg="green", fg="white").pack(side=tk.LEFT, padx=5)
+        tk.Button(button_frame, text="Examine Order", command=self.examine_order, bg="blue", fg="white").pack(side=tk.LEFT, padx=5)
         tk.Button(button_frame, text="Back", command=lambda: self.controller.show_frame('main_menu'), bg="red", fg="white").pack(side=tk.LEFT, padx=5)
 
     def mark_complete(self):
